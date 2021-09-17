@@ -9,7 +9,9 @@ from functools import reduce
 
 st.title("Exploração dos Dados de Pokémon")
 
-st.info('O seguinte dashboard foi proposto no Trabalho Prático II do Módulo de Bibliotecas e API\'s do curso do Data Science Degree')
+st.info('''O seguinte dashboard foi proposto no Trabalho Prático II do Módulo de Bibliotecas e API\'s
+do curso Data Science Degree da Lets\' Code por Felipe Prates e Miguel Prytoluk.\n
+Utilize um PC, ou a versão Desktop do site no celular, para melhor visualização.''')
 
 # padrão de fundo gerado no site https://www.magicpattern.design/tools/css-backgrounds
 # cores convertidas para rgba (para aplicar alpha) com http://hex2rgba.devoth.com/
@@ -105,7 +107,7 @@ fig_scat.for_each_trace(lambda t: t.update(name = {f"Tipo={t}": t for t in type_
 
 st.plotly_chart(fig_scat)
 
-st.info('''Nos gráficos de dispersão podemos observar algumas correlações entre atributos, principalmente quando filtramos por tipo.
+st.info('''Nos gráficos de dispersão podemos observar algumas correlações entre atributos, principalmente quando filtramos por tipo.\n
 Podemos destacar a correlação entre os atributos Ataque e Defesa no tipo Normal,
 e entre Ataque Especial e Defesa Especial nos pokémons de tipo Elétrico.''')
 st.info('''Existem apenas 27 pokémons do tipo Dragão e estes apresentam padrões em diversos atributos:
@@ -122,13 +124,22 @@ pk_compare = [col.selectbox(f'Pokémon {i + 1}', df.Nome, (0,3)[i] ) for i, col 
 getPkPic = lambda n: f"https://github.com/kvpratama/gan/raw/master/pokemon/data/pokemon/{n}.jpg"
 pk_imgs = [col.image(getPkPic(df[df.Nome == pk_compare[i]]['Nº na Pokédex'].values[0])) for i, col in enumerate(st.columns(2))]
 
-col1, col2, col3, col4, col5 = st.columns(5)
-pk_infos = [col.metric(param, f'{df[df.Nome == pk_compare[i]][param].values[0]}') for param in ['Nº na Pokédex', 'Geração'] for i, col in enumerate([col2, col4])]
+st.markdown('<style>#root > div:nth-child(1) > div > div > div > div > section > div > div:nth-child(1) > div:nth-child(28) > div > div > div:nth-child(1) > div:nth-child(1) > div > div.css-1ezm4r7.e16fv1kl2 > div{font-size: 1.75rem}</style>', unsafe_allow_html=True)
 
-for o in options:
-  val1 = df[df.Nome == pk_compare[0]][o].values[0]
-  val2 = df[df.Nome == pk_compare[1]][o].values[0]
-  col2.metric(o, f'{val1}', f'{round( val1 - val2, 2)}')
-  col4.metric(o, f'{val2}', f'{round( val2 - val1, 2)}')
+col1, col2, col3, col4, col5, col6 = st.columns(6)
+pk_infos = [cols[i].metric(param, f'{df[df.Nome == pk_compare[j]][param].values[0]}')
+  for i, param in enumerate(['Nº na Pokédex', 'Geração', 'Tipo'])
+  for j, cols in enumerate([[col1, col2, col3], [col4, col5, col6]])]
 
+for o_slice in np.array_split(options, 3):
+  for i_o, o in enumerate(o_slice):
+    val1 = df[df.Nome == pk_compare[0]][o].values[0]
+    val2 = df[df.Nome == pk_compare[1]][o].values[0]
+    [col1,col2,col3][i_o].metric(o, f'{val1}', f'{round( val1 - val2, 2)}')
+    [col4,col5,col6][i_o].metric(o, f'{val2}', f'{round( val2 - val1, 2)}')
+
+#############################################################################
+#                                Conclusão                                  #
+#############################################################################
+st.header("Conclusão:")
 st.info('Através das análises tanto por \'Tipo\' no gráfico 1 quanto por \'Atributos\' em cada \'Tipo\' no Gráfico 2, podemos observar que os Pokémons são muito bem distribuidos ao longo de suas gerações criando um ambiente competitivo e atrativo para diversas escolhas de treinamento e combate, o que faz com o tema seja bastante discutido com tantas formas de criar uma estratégia para interagir com esse universo.')
