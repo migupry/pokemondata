@@ -31,31 +31,34 @@ st.markdown(page_bg_img, unsafe_allow_html=True)
 type_colors = {	"normal": '#A8A77A', "fire": '#EE8130',	"water": '#6390F0',	"electric": '#F7D02C',	"grass": '#7AC74C',	"ice": '#96D9D6',	"fighting": '#C22E28',	"poison": '#A33EA1',	"ground": '#E2BF65',	"flying": '#A98FF3',	"psychic": '#F95587',	"bug": '#A6B91A',	"rock": '#B6A136',	"ghost": '#735797',	"dragon": '#6F35FC',	"dark": '#705746',	"steel": '#B7B7CE',"fairy": '#D685AD'}
 
 # Carrega Dataframe e Renomeia Colunas
-df = pd.read_csv("https://github.com/migupry/pokemondata/raw/main/pokemon.csv").rename(columns={
-  'abilities': "Habilidades",
-  "name": "Nome",
-  "pokedex_number": "Nº na Pokédex",
-  "generation": "Geração",
-  "japanese_name": "Nome Japonês",
-  "percentage_male": "% Macho",
-  "base_egg_steps": "Passos Ovo Base",
-  "base_happiness": "Felicidade Base",
-  "base_total": "Total Base",
-  "capture_rate": "Taxa de Captura",
-  "classfication": "Classificação",
-  "experience_growth": "Experiência p/ Crescer",
-  "is_legendary": "É lendario?",
-  "type1": "Tipo",
-  "type2": "Tipo2",
-  "attack": "Ataque",
-  "defense": "Defesa",
-  "height_m": "Altura (m)",
-  "hp": "HP",
-  "sp_attack": "Ataque Especial",
-  "sp_defense": "Defesa Especial",
-  "speed": "Velocidade",
-  "weight_kg": "Peso (kg)"
-}).rename(columns={f"against_{tipo}": f"Contra {tipo.capitalize()}" for tipo in list(type_colors.keys()) + ["fight"]})
+@st.cache(suppress_st_warning=True)
+def load_csv():
+  return pd.read_csv("https://github.com/migupry/pokemondata/raw/main/pokemon.csv").rename(columns={
+    'abilities': "Habilidades",
+    "name": "Nome",
+    "pokedex_number": "Nº na Pokédex",
+    "generation": "Geração",
+    "japanese_name": "Nome Japonês",
+    "percentage_male": "% Macho",
+    "base_egg_steps": "Passos Ovo Base",
+    "base_happiness": "Felicidade Base",
+    "base_total": "Total Base",
+    "capture_rate": "Taxa de Captura",
+    "classfication": "Classificação",
+    "experience_growth": "Experiência p/ Crescer",
+    "is_legendary": "É lendario?",
+    "type1": "Tipo",
+    "type2": "Tipo2",
+    "attack": "Ataque",
+    "defense": "Defesa",
+    "height_m": "Altura (m)",
+    "hp": "HP",
+    "sp_attack": "Ataque Especial",
+    "sp_defense": "Defesa Especial",
+    "speed": "Velocidade",
+    "weight_kg": "Peso (kg)"
+  }).rename(columns={f"against_{tipo}": f"Contra {tipo.capitalize()}" for tipo in list(type_colors.keys()) + ["fight"]})
+df = load_csv();
 st.header('Base de dados completa:')
 st.write(df)
 
@@ -82,8 +85,11 @@ st.info('Em todo o universo Pokemóm temos 801 criaturas, sendo 18 tipos, e divi
 df_gen_types = gen_checkboxes("types")
 pk_types = df_gen_types.groupby("Tipo").size().reset_index(name='Quantidade')
 # seta as cores na ordem dos mais frequentes (exigido pelo plotly) buscando no dicionário "type_colors"
-pk_colors = [type_colors[t] for t in pk_types.sort_values(by="Quantidade",ascending=False).Tipo.values]
-fig_pie = px.pie(pk_types, values='Quantidade', names = 'Tipo', color_discrete_sequence = pk_colors, title='Percentual dos tipos de Pokémon:')
+@st.cache(suppress_st_warning=True)
+def pie_chart(pk_types):
+  pk_colors = [type_colors[t] for t in pk_types.sort_values(by="Quantidade",ascending=False).Tipo.values]
+  return px.pie(pk_types, values='Quantidade', names = 'Tipo', color_discrete_sequence = pk_colors, title='Percentual dos tipos de Pokémon:')
+fig_pie = pie_chart(pk_types)
 
 st.plotly_chart(fig_pie)
 
@@ -100,10 +106,15 @@ feat_x = col1.radio("Feature para o eixo x do gráfico", options)
 feat_y = col2.radio("Feature para o eixo y do gráfico", options, index=1)
 
 df_gen_scatter = gen_checkboxes("scatter")
-fig_scat = px.scatter(df_gen_scatter, x=feat_x, y=feat_y, color="Tipo", color_discrete_map = type_colors, hover_data=['Nome', "Nº na Pokédex", "Geração"])
 
-# remove o texto "Type=" das legendas de cores
-fig_scat.for_each_trace(lambda t: t.update(name = {f"Tipo={t}": t for t in type_colors.keys()}[t.name]))
+@st.cache(suppress_st_warning=True)
+def scatter_plot(df_gen_scatter):
+  fig_scat = px.scatter(df_gen_scatter, x=feat_x, y=feat_y, color="Tipo", color_discrete_map = type_colors, hover_data=['Nome', "Nº na Pokédex", "Geração"])
+  # remove o texto "Type=" das legendas de cores
+  fig_scat.for_each_trace(lambda t: t.update(name = {f"Tipo={t}": t for t in type_colors.keys()}[t.name]))
+  return fig_scat
+  
+fig_scat = scatter_plot(df_gen_scatter)
 
 st.plotly_chart(fig_scat)
 
@@ -124,7 +135,7 @@ pk_compare = [col.selectbox(f'Pokémon {i + 1}', df.Nome, (0,3)[i] ) for i, col 
 getPkPic = lambda n: f"https://github.com/kvpratama/gan/raw/master/pokemon/data/pokemon/{n}.jpg"
 pk_imgs = [col.image(getPkPic(df[df.Nome == pk_compare[i]]['Nº na Pokédex'].values[0])) for i, col in enumerate(st.columns(2))]
 
-st.markdown('<style>#root > div:nth-child(1) > div > div > div > div > section > div > div:nth-child(1) > div:nth-child(28) > div > div > div:nth-child(1) > div:nth-child(1) > div > div.css-1ezm4r7.e16fv1kl2 > div{font-size: 1.75rem}</style>', unsafe_allow_html=True)
+st.markdown('<style>div.css-1ezm4r7 > div.css-3ggkhc{font-size: 1.75rem}</style>', unsafe_allow_html=True)
 
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 pk_infos = [cols[i].metric(param, f'{df[df.Nome == pk_compare[j]][param].values[0]}')
