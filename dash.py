@@ -9,7 +9,9 @@ from functools import reduce
 
 st.title("Exploração dos Dados de Pokémon")
 
-# padrão de fundogerado no site https://www.magicpattern.design/tools/css-backgrounds
+st.info('O seguinte dashboard foi proposto no Trabalho Prático II do Módulo de Bibliotecas e API\'s do curso do Data Science Degree')
+
+# padrão de fundo gerado no site https://www.magicpattern.design/tools/css-backgrounds
 # cores convertidas para rgba (para aplicar alpha) com http://hex2rgba.devoth.com/
 page_bg_img = '''
 <style>
@@ -73,6 +75,8 @@ def gen_checkboxes(key):
 #############################################################################
 st.header("Tipos de Pokémon")
 
+st.info('Em todo o universo Pokemóm temos 801 criaturas, sendo 18 tipos, e divididos em 7 gerações descobertas. Cada criatura Pokemon possui as mesmas características dos indivíduos de sua espécie, como valor de ataque, defesa, HP, entre outras. Dessa forma, buscamos entender primeiramente se a proporção de tipos é constante ao longo das gerações.')
+
 df_gen_types = gen_checkboxes("types")
 pk_types = df_gen_types.groupby("Tipo").size().reset_index(name='Quantidade')
 # seta as cores na ordem dos mais frequentes (exigido pelo plotly) buscando no dicionário "type_colors"
@@ -81,11 +85,13 @@ fig_pie = px.pie(pk_types, values='Quantidade', names = 'Tipo', color_discrete_s
 
 st.plotly_chart(fig_pie)
 
+st.info('Observando o proporcional de tipos ao longo das 7 gerações podemos observar uma predominância de Pokemons de Água, Normal, Grama e Inseto, correspondendo a quase 50% dos Pokemons, o também evidencia a raridade dos tipo Voador, Fada, Gelo e Metal.')
+
 #############################################################################
 #                          Gráficos de Dispersão                            #
 #############################################################################
 st.header("Gráficos de dispersão:")
-
+st.info('No segundo gráfico, buscamos encontrar padrões entre as característcas e habilidades entre cada tipo ao longo das gerações')
 options = ["Ataque", "Defesa", "HP", "Ataque Especial", "Defesa Especial", "Velocidade", "Altura (m)", "Peso (kg)"]
 col1, col2 = st.columns(2)
 feat_x = col1.radio("Feature para o eixo x do gráfico", options)
@@ -99,11 +105,18 @@ fig_scat.for_each_trace(lambda t: t.update(name = {f"Tipo={t}": t for t in type_
 
 st.plotly_chart(fig_scat)
 
+st.info('''Nos gráficos de dispersão podemos observar algumas correlações entre atributos, principalmente quando filtramos por tipo.
+Podemos destacar a correlação entre os atributos Ataque e Defesa no tipo Normal,
+e entre Ataque Especial e Defesa Especial nos pokémons de tipo Elétrico.''')
+st.info('''Existem apenas 27 pokémons do tipo Dragão e estes apresentam padrões em diversos atributos:
+Podemos ver correlações entre Ataque x Velocidade x HP, bem como Peso e HP.''')
+st.info('''Esperávamos uma correlação entre Peso e Defesa, que não foi observada em nenhum tipo de pokémon na base de dados.''')
 
 #############################################################################
 #                            Comparar Pokémons                              #
 #############################################################################
 st.header("Comparar pokémons:")
+st.info('Abaixo podemos comparar cada espécie Pokémon e seus atributos visualizando suas imagens.')
 pk_compare = [col.selectbox(f'Pokémon {i + 1}', df.Nome, (0,3)[i] ) for i, col in enumerate(st.columns(2))]
 # Baixa as imagens dos pokémons e imprime na tela
 getPkPic = lambda n: f"https://github.com/kvpratama/gan/raw/master/pokemon/data/pokemon/{n}.jpg"
@@ -117,3 +130,5 @@ for o in options:
   val2 = df[df.Nome == pk_compare[1]][o].values[0]
   col2.metric(o, f'{val1}', f'{round( val1 - val2, 2)}')
   col4.metric(o, f'{val2}', f'{round( val2 - val1, 2)}')
+
+st.info('Através das análises tanto por \'Tipo\' no gráfico 1 quanto por \'Atributos\' em cada \'Tipo\' no Gráfico 2, podemos observar que os Pokémons são muito bem distribuidos ao longo de suas gerações criando um ambiente competitivo e atrativo para diversas escolhas de treinamento e combate, o que faz com o tema seja bastante discutido com tantas formas de criar uma estratégia para interagir com esse universo.')
