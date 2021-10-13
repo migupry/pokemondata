@@ -9,9 +9,7 @@ from functools import reduce
 
 st.title("Exploração dos Dados de Pokémon")
 
-st.info('''O seguinte dashboard foi proposto no Trabalho Prático II do Módulo de Bibliotecas e API\'s
-do curso Data Science Degree da Lets\' Code por Felipe Prates e Miguel Prytoluk.\n
-Utilize um PC, ou a versão Desktop do site no celular, para melhor visualização.''')
+st.info('''Utilize um PC, ou a versão Desktop do site no celular, para melhor visualização.''')
 
 # padrão de fundo gerado no site https://www.magicpattern.design/tools/css-backgrounds
 # cores convertidas para rgba (para aplicar alpha) com http://hex2rgba.devoth.com/
