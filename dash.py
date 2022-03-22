@@ -146,9 +146,3 @@ for o_slice in np.array_split(options, 3):
     val2 = df[df.Nome == pk_compare[1]][o].values[0]
     [col1,col2,col3][i_o].metric(o, f'{val1}', f'{round( val1 - val2, 2)}')
     [col4,col5,col6][i_o].metric(o, f'{val2}', f'{round( val2 - val1, 2)}')
-
-#############################################################################
-#                                Conclusão                                  #
-#############################################################################
-st.header("Conclusão:")
-st.info('Através das análises tanto por \'Tipo\' no gráfico 1 quanto por \'Atributos\' em cada \'Tipo\' no Gráfico 2, podemos observar que os Pokémons são muito bem distribuidos ao longo de suas gerações criando um ambiente competitivo e atrativo para diversas escolhas de treinamento e combate, o que faz com o tema seja bastante discutido com tantas formas de criar uma estratégia para interagir com esse universo.')
